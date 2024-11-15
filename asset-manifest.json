@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/davicho7777/gym_tracker_react/static/css/main.bf4ac4ca.css",
+    "main.js": "/davicho7777/gym_tracker_react/static/js/main.3197040b.js",
+    "index.html": "/davicho7777/gym_tracker_react/index.html",
+    "main.bf4ac4ca.css.map": "/davicho7777/gym_tracker_react/static/css/main.bf4ac4ca.css.map",
+    "main.3197040b.js.map": "/davicho7777/gym_tracker_react/static/js/main.3197040b.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.bf4ac4ca.css",
+    "static/js/main.3197040b.js"
+  ]
+}
