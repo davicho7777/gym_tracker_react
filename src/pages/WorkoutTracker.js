@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
-import  Button  from '@components/ui/button'
-import  Input  from '@components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table'
+import  Button  from '../components/ui/button'
+import  Input  from '../components/ui/input'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table'
 import { Edit2, Check, X, Plus, Minus } from 'lucide-react'
 
 
