@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
-import  Button  from './src/components/ui/button'
-import  Input  from './src/components/ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './src/components/ui/table'
+import  Button  from 'C:/Users/Usuario/my-workout-tracker/src/components/ui/button'
+import  Input  from 'C:/Users/Usuario/my-workout-tracker/src/components/ui/input'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'C:/Users/Usuario/my-workout-tracker/src/components/ui/table'
 import { Edit2, Check, X, Plus, Minus } from 'lucide-react'
+
 
 const initialExercises = {
   day1: ["Press de Banca", "Fondos en Paralelas", "Elevaciones Laterales", "Extensiones de Tríceps"],
