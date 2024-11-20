@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Button from '../components/ui/button'
 import Input from '../components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table'
-import { Edit2, Check, X, Plus, Minus } from 'lucide-react'
+import { Edit2, Check, X, Plus, Minus, Sun, Moon } from 'lucide-react'
 
 const defaultExercises = ["Press de Banca", "Fondos en Paralelas", "Elevaciones Laterales", "Extensiones de Tríceps"]
 
@@ -57,6 +57,7 @@ export default function WorkoutTracker() {
   const [exercises, setExercises] = useState(initialExercises)
   const [editingExercise, setEditingExercise] = useState({ day: '', index: -1 })
   const [newExerciseName, setNewExerciseName] = useState('')
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     // Inicializar la semana actual si no existe en el estado
@@ -72,6 +73,18 @@ export default function WorkoutTracker() {
     }
     restoreInputs()
   }, [currentWeek, exercises])
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(prevMode => !prevMode);
+  }
 
   function addDay() {
     const currentDays = Object.keys(exercises[currentWeek] || {})
@@ -242,14 +255,17 @@ export default function WorkoutTracker() {
       }))
     }
   }
-
-return (
+  return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold text-center mb-4">Registro de Ejercicios Mensuales</h1>
       <div className="flex justify-center items-center mb-4">
         <Button onClick={() => setCurrentWeek(prev => prev > 1 ? prev - 1 : prev)}>Semana Anterior</Button>
         <span className="mx-4 font-bold">Semana {currentWeek}</span>
         <Button onClick={() => setCurrentWeek(prev => prev + 1)}>Semana Siguiente</Button>
+        <Button onClick={toggleDarkMode} variant="outline" className="ml-4">
+          {isDarkMode ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
+          {isDarkMode ? 'Modo Claro' : 'Modo Oscuro'}
+        </Button>
       </div>
       <div className="text-center mb-4 text-sm text-gray-600">{getWeekDates(currentWeek)}</div>
       <div className="flex justify-center mb-4 space-x-2">
@@ -264,18 +280,20 @@ return (
           Añadir Día
         </Button>
       </div>
-      <Table>
-        <TableHeader>
+      <Table className="table">
+        <TableHeader className="table-header">
           <TableRow>
             {Object.keys(exercises[currentWeek] || {}).map(day => (
-              <TableHead key={day}>{day}</TableHead>
+              <TableHead key={day} className="table-header-th">
+                {day}
+              </TableHead>
             ))}
-        </TableRow>
+          </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="table-body">
           <TableRow>
             {Object.keys(exercises[currentWeek] || {}).map(day => (
-              <TableCell key={day}>
+              <TableCell key={day} className="table-body-td">
                 <div className="flex justify-between items-center mb-2">
                   <span className="mr-2">Ejercicios: {exercises[currentWeek][day].length}</span>
                   <div className="flex items-center">
@@ -287,13 +305,13 @@ return (
                     </Button>
                   </div>
                 </div>
-                <Table>
-                  <TableBody>
+                <Table className="table">
+                  <TableBody className="table-body">
                     {exercises[currentWeek][day].map((exercise, index) => (
-                      <TableRow key={`${day}-${index}`}>
-                        <TableCell>
+                      <TableRow key={`${day}-${index}`} className="table-body-tr">
+                        <TableCell className="table-body-td">
                           <div className="flex items-center justify-between mb-2">
-                            {editingExercise.day === day && editingExercise.index === index? (
+                            {editingExercise.day === day && editingExercise.index === index ? (
                               <>
                                 <Input
                                   value={newExerciseName}
