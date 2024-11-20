@@ -1,17 +1,25 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
-import  Button  from '../components/ui/button'
-import  Input  from '../components/ui/input'
+import Button from '../components/ui/button'
+import Input from '../components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table'
 import { Edit2, Check, X, Plus, Minus } from 'lucide-react'
 
+const defaultExercises = ["Press de Banca", "Fondos en Paralelas", "Elevaciones Laterales", "Extensiones de Tríceps"]
+
+function getCurrentWeek() {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), 0, 1)
+  return Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7)
+}
 
 const initialExercises = {
-  day1: ["Press de Banca", "Fondos en Paralelas", "Elevaciones Laterales", "Extensiones de Tríceps"],
-  day2: ["Sentadilla", "Prensa", "Curl de Piernas / Extensión de Piernas", "Elevación de Talones"],
-  day3: ["Dominadas", "Remo con Barra", "Pull-over", "Curl con Barra"]
+  [getCurrentWeek()]: {
+    day1: ["Press de Banca", "Fondos en Paralelas", "Elevaciones Laterales", "Extensiones de Tríceps"],
+    day2: ["Sentadilla", "Prensa", "Curl de Piernas / Extensión de Piernas", "Elevación de Talones"],
+    day3: ["Dominadas", "Remo con Barra", "Pull-over", "Curl con Barra"]
+  }
 }
 
 const RepCounter = ({ id, initialValue = 0 }) => {
@@ -51,13 +59,47 @@ export default function WorkoutTracker() {
   const [newExerciseName, setNewExerciseName] = useState('')
 
   useEffect(() => {
+    // Inicializar la semana actual si no existe en el estado
+    if (!exercises[currentWeek]) {
+      setExercises(prev => ({
+        ...prev,
+        [currentWeek]: {
+          day1: ["Press de Banca", "Fondos en Paralelas", "Elevaciones Laterales", "Extensiones de Tríceps"],
+          day2: ["Sentadilla", "Prensa", "Curl de Piernas / Extensión de Piernas", "Elevación de Talones"],
+          day3: ["Dominadas", "Remo con Barra", "Pull-over", "Curl con Barra"]
+        }
+      }))
+    }
     restoreInputs()
-  }, [currentWeek])
+  }, [currentWeek, exercises])
 
-  function getCurrentWeek() {
-    const now = new Date()
-    const start = new Date(now.getFullYear(), 0, 1)
-    return Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7)
+  function addDay() {
+    const currentDays = Object.keys(exercises[currentWeek] || {})
+    const newDayNumber = currentDays.length + 1
+    const newDayKey = `day${newDayNumber}`
+    
+    setExercises(prev => ({
+      ...prev,
+      [currentWeek]: {
+        ...prev[currentWeek],
+        [newDayKey]: [...defaultExercises]
+      }
+    }))
+  }
+
+  function removeDay() {
+    const currentDays = Object.keys(exercises[currentWeek] || {})
+    if (currentDays.length <= 1) {
+      alert('Debe mantener al menos un día de ejercicios')
+      return
+    }
+    
+    const lastDay = currentDays[currentDays.length - 1]
+    const { [lastDay]: removedDay, ...remainingDays } = exercises[currentWeek]
+    setExercises(prev => ({
+      ...prev,
+      [currentWeek]: remainingDays
+    }))
   }
 
   function getWeekDates(week) {
@@ -83,14 +125,17 @@ export default function WorkoutTracker() {
   }
 
   function getExerciseName(day, index) {
-    return localStorage.getItem(`exercise-${currentWeek}-${day}-${index}`) || exercises[day][index]
+    return localStorage.getItem(`exercise-${currentWeek}-${day}-${index}`) || exercises[currentWeek][day][index]
   }
 
   function setExerciseName(day, index, name) {
     localStorage.setItem(`exercise-${currentWeek}-${day}-${index}`, name)
     setExercises(prev => ({
       ...prev,
-      [day]: prev[day].map((exercise, i) => i === index ? name : exercise)
+      [currentWeek]: {
+        ...prev[currentWeek],
+        [day]: prev[currentWeek][day].map((exercise, i) => i === index ? name : exercise)
+      }
     }))
   }
 
@@ -102,46 +147,56 @@ export default function WorkoutTracker() {
   function handlePrint() {
     let printContent = '<html><head><title>Datos Guardados</title></head><body>'
     printContent += `<h1>Datos Guardados</h1>`
-
+  
+    // Recorre todas las semanas almacenadas en el localStorage
+    const savedWeeks = []
     for (let week = 1; week <= getCurrentWeek(); week++) {
       let weekHasData = false
       let weekContent = `<h2>Semana ${week}</h2>`
-
-      Object.keys(exercises).forEach(day => {
-        let dayHasData = false
-        let dayContent = `<h3>${day}</h3>`
-
-        exercises[day].forEach((exercise, index) => {
-          const reps = [1, 2, 3].map(set => 
-            localStorage.getItem(`reps-${week}-${day}-${index}-set${set}`) || '0'
-          )
-          const kilos = localStorage.getItem(`number-${week}-${day}-${index}`) || ''
-
-          if (reps.some(rep => rep !== '0') || kilos) {
-            dayHasData = true
-            dayContent += `<p>${getExerciseName(day, index)}:<br> 
-              Repeticiones: Set 1: ${reps[0]}, Set 2: ${reps[1]}, Set 3: ${reps[2]} <br> 
-              Kilos: ${kilos}</p>`
+  
+      if (exercises[week]) {
+        Object.keys(exercises[week]).forEach(day => {
+          let dayHasData = false
+          let dayContent = `<h3>${day}</h3>`
+  
+          exercises[week][day].forEach((exercise, index) => {
+            const reps = [1, 2, 3].map(set => 
+              localStorage.getItem(`reps-${week}-${day}-${index}-set${set}`) || '0'
+            )
+            const kilos = localStorage.getItem(`number-${week}-${day}-${index}`) || ''
+  
+            if (reps.some(rep => rep !== '0') || kilos) {
+              dayHasData = true
+              dayContent += `<p>${getExerciseName(day, index)}:<br> 
+                Repeticiones: Set 1: ${reps[0]}, Set 2: ${reps[1]}, Set 3: ${reps[2]} <br> 
+                Kilos: ${kilos}</p>`
+            }
+          })
+  
+          if (dayHasData) {
+            weekHasData = true
+            weekContent += dayContent
           }
         })
-
-        if (dayHasData) {
-          weekHasData = true
-          weekContent += dayContent
-        }
-      })
-
+      }
+  
       if (weekHasData) {
+        savedWeeks.push(week) // Guarda la semana con datos
         printContent += weekContent
       }
     }
-
-    printContent += '</body></html>'
-
-    const printWindow = window.open('', '', 'width=800,height=600')
-    printWindow.document.write(printContent)
-    printWindow.document.close()
-    printWindow.print()
+  
+    // Si hay semanas con datos, imprime el contenido
+    if (savedWeeks.length > 0) {
+      printContent += '</body></html>'
+  
+      const printWindow = window.open('', '', 'width=800,height=600')
+      printWindow.document.write(printContent)
+      printWindow.document.close()
+      printWindow.print()
+    } else {
+      alert('No hay datos guardados para imprimir.')
+    }
   }
 
   function startEditing(day, index) {
@@ -162,138 +217,125 @@ export default function WorkoutTracker() {
   }
 
   function handleExerciseCountChange(day, newCount) {
-    const currentCount = exercises[day].length
+    const currentCount = exercises[currentWeek][day].length
     if (newCount > currentCount) {
-      const newExercises = [...exercises[day], ...Array(newCount - currentCount).fill("Nuevo Ejercicio")]
-      setExercises(prev => ({ ...prev, [day]: newExercises }))
+      const newExercises = [...exercises[currentWeek][day], ...Array(newCount - currentCount).fill("Nuevo Ejercicio")]
+      setExercises(prev => ({
+        ...prev,
+        [currentWeek]: {
+          ...prev[currentWeek],
+          [day]: newExercises
+        }
+      }))
     } else if (newCount < currentCount) {
-      const newExercises = exercises[day].slice(0, newCount)
-      setExercises(prev => ({ ...prev, [day]: newExercises }))
+      const newExercises = exercises[currentWeek][day].slice(0, newCount)
+      setExercises(prev => ({
+        ...prev,
+        [currentWeek]: {
+          ...prev[currentWeek],
+          [day]: newExercises
+        }
+      }))
     }
-  }
-
-  const onDragEnd = (result) => {
-    if (!result.destination) {
-      return
-    }
-
-    const sourceDay = result.source.droppableId
-    const destinationDay = result.destination.droppableId
-
-    const newExercises = { ...exercises }
-    const [reorderedItem] = newExercises[sourceDay].splice(result.source.index, 1)
-    newExercises[destinationDay].splice(result.destination.index, 0, reorderedItem)
-
-    setExercises(newExercises)
   }
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold text-center mb-4">Registro de Ejercicios Mensuales</h1>
-        <div className="flex justify-center items-center mb-4">
-          <Button onClick={() => setCurrentWeek(prev => prev > 1 ? prev - 1 : prev)}>Semana Anterior</Button>
-          <span className="mx-4 font-bold">Semana {currentWeek}</span>
-          <Button onClick={() => setCurrentWeek(prev => prev + 1)}>Semana Siguiente</Button>
-        </div>
-        <div className="text-center mb-4 text-sm text-gray-600">{getWeekDates(currentWeek)}</div>
-        <div className="flex justify-center mb-4 space-x-2">
-          <Button onClick={handleSave}>Guardar Progreso</Button>
-          <Button onClick={handlePrint}>Imprimir Datos</Button>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {Object.keys(exercises).map(day => (
-                <TableHead key={day}>
-                  <div className="flex justify-between items-center">
-                    <span>{day}</span>
-                    <div className="flex items-center">
-                      <span className="mr-2">Ejercicios: {exercises[day].length}</span>
-                      <Button size="icon" variant="outline" onClick={() => handleExerciseCountChange(day, exercises[day].length - 1)}>
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="outline" onClick={() => handleExerciseCountChange(day, exercises[day].length + 1)}>
-                        <Plus className="h-4 w-4" />
-                      </Button>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold text-center mb-4">Registro de Ejercicios Mensuales</h1>
+      <div className="flex justify-center items-center mb-4">
+        <Button onClick={() => setCurrentWeek(prev => prev > 1 ? prev - 1 : prev)}>Semana Anterior</Button>
+        <span className="mx-4 font-bold">Semana {currentWeek}</span>
+        <Button onClick={() => setCurrentWeek(prev => prev + 1)}>Semana Siguiente</Button>
+      </div>
+      <div className="text-center mb-4 text-sm text-gray-600">{getWeekDates(currentWeek)}</div>
+      <div className="flex justify-center mb-4 space-x-2">
+        <Button onClick={handleSave}>Guardar Progreso</Button>
+        <Button onClick={handlePrint}>Imprimir Datos</Button>
+        <Button onClick={removeDay} variant="outline">
+          <Minus className="h-4 w-4 mr-2" />
+          Quitar Día
+        </Button>
+        <Button onClick={addDay} variant="outline">
+          <Plus className="h-4 w-4 mr-2" />
+          Añadir Día
+        </Button>
+      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {Object.keys(exercises[currentWeek] || {}).map(day => (
+              <TableHead key={day}>
+                <div className="flex justify-between items-center">
+                  <span>{day}</span>
+                  <div className="flex items-center">
+                    <span className="mr-2">Ejercicios: {exercises[currentWeek][day].length}</span>
+                    <Button size="icon" variant="outline" onClick={() => handleExerciseCountChange(day, exercises[currentWeek][day].length - 1)}>
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="outline" onClick={() => handleExerciseCountChange(day, exercises[currentWeek][day].length + 1)}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            {Object.keys(exercises[currentWeek] || {}).map(day => (
+              <TableCell key={day}>
+                {exercises[currentWeek][day].map((exercise, index) => (
+                  <div key={`${day}-${index}`} className="mb-6 p-2 bg-gray-100 rounded">
+                    <div className="flex items-center justify-between mb-2">
+                      {editingExercise.day === day && editingExercise.index === index ? (
+                        <>
+                          <Input
+                            value={newExerciseName}
+                            onChange={(e) => setNewExerciseName(e.target.value)}
+                            className="mr-2"
+                          />
+                          <div>
+                            <Button size="icon" variant="ghost" onClick={saveNewExerciseName} className="mr-1">
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button size="icon" variant="ghost" onClick={cancelEditing}>
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-medium">{getExerciseName(day, index)}</span>
+                          <Button size="icon" variant="ghost" onClick={() => startEditing(day, index)}>
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      {[1, 2, 3].map(set => (
+                        <div key={`${day}-${index}-set${set}`} className="flex items-center justify-between">
+                          <span className="w-16">Set {set}:</span>
+                          <RepCounter id={`reps-${currentWeek}-${day}-${index}-set${set}`} />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <label htmlFor={`number-${currentWeek}-${day}-${index}`} className="mr-2">Kilos:</label>
+                      <Input
+                        type="number"
+                        id={`number-${currentWeek}-${day}-${index}`}
+                        className="w-20"
+                      />
                     </div>
                   </div>
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              {Object.keys(exercises).map(day => (
-                <TableCell key={day}>
-                  <Droppable droppableId={day}>
-                    {(provided) => (
-                      <div {...provided.droppableProps} ref={provided.innerRef}>
-                        {exercises[day].map((exercise, index) => (
-                          <Draggable key={`${day}-${index}`} draggableId={`${day}-${index}`} index={index}>
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className="mb-6 p-2 bg-gray-100 rounded"
-                              >
-                                <div className="flex items-center justify-between mb-2">
-                                  {editingExercise.day === day && editingExercise.index === index ? (
-                                    <>
-                                      <Input
-                                        value={newExerciseName}
-                                        onChange={(e) => setNewExerciseName(e.target.value)}
-                                        className="mr-2"
-                                      />
-                                      <div>
-                                        <Button size="icon" variant="ghost" onClick={saveNewExerciseName} className="mr-1">
-                                          <Check className="h-4 w-4" />
-                                        </Button>
-                                        <Button size="icon" variant="ghost" onClick={cancelEditing}>
-                                          <X className="h-4 w-4" />
-                                        </Button>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span className="font-medium">{getExerciseName(day, index)}</span>
-                                      <Button size="icon" variant="ghost" onClick={() => startEditing(day, index)}>
-                                        <Edit2 className="h-4 w-4" />
-                                      </Button>
-                                    </>
-                                  )}
-                                </div>
-                                <div className="space-y-2">
-                                  {[1, 2, 3].map(set => (
-                                    <div key={`${day}-${index}-set${set}`} className="flex items-center justify-between">
-                                      <span className="w-16">Set {set}:</span>
-                                      <RepCounter id={`reps-${currentWeek}-${day}-${index}-set${set}`} />
-                                    </div>
-                                  ))}
-                                </div>
-                                <div className="mt-2 flex items-center justify-between">
-                                  <label htmlFor={`number-${currentWeek}-${day}-${index}`} className="mr-2">Kilos:</label>
-                                  <Input
-                                    type="number"
-                                    id={`number-${currentWeek}-${day}-${index}`}
-                                    className="w-20"
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
-    </DragDropContext>
+                ))}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
   )
 }
