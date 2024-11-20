@@ -145,57 +145,61 @@ export default function WorkoutTracker() {
   }
 
   function handlePrint() {
-    let printContent = '<html><head><title>Datos Guardados</title></head><body>'
-    printContent += `<h1>Datos Guardados</h1>`
+    let printContent = '<html><head><title>Datos Guardados</title></head><body>';
+    printContent += `<h1>Datos Guardados</h1>`;
   
-    // Recorre todas las semanas almacenadas en el localStorage
-    const savedWeeks = []
+    const savedWeeks = [];
+  
+    // Iterar a través de las semanas hasta la semana actual
     for (let week = 1; week <= getCurrentWeek(); week++) {
-      let weekHasData = false
-      let weekContent = `<h2>Semana ${week}</h2>`
+      let weekHasData = false;
+      let weekContent = `<h2>Semana ${week} (${getWeekDates(week)})</h2>`;
   
+      // Verificar si la semana existe en "exercises"
       if (exercises[week]) {
+        // Iterar a través de los días en la semana
         Object.keys(exercises[week]).forEach(day => {
-          let dayHasData = false
-          let dayContent = `<h3>${day}</h3>`
+          // Verificar si el día existe y tiene datos
+          if (exercises[week][day]) {
+            let dayHasData = false;
+            let dayContent = `<h3>${day}</h3>`;
   
-          exercises[week][day].forEach((exercise, index) => {
-            const reps = [1, 2, 3].map(set => 
-              localStorage.getItem(`reps-${week}-${day}-${index}-set${set}`) || '0'
-            )
-            const kilos = localStorage.getItem(`number-${week}-${day}-${index}`) || ''
+            exercises[week][day].forEach((exercise, index) => {
+              const reps = [1, 2, 3].map(set =>
+                localStorage.getItem(`reps-${week}-${day}-${index}-set${set}`) || '0'
+              );
+              const kilos = localStorage.getItem(`number-${week}-${day}-${index}`) || '0';
   
-            if (reps.some(rep => rep !== '0') || kilos) {
-              dayHasData = true
-              dayContent += `<p>${getExerciseName(day, index)}:<br> 
-                Repeticiones: Set 1: ${reps[0]}, Set 2: ${reps[1]}, Set 3: ${reps[2]} <br> 
-                Kilos: ${kilos}</p>`
+              if (reps.some(rep => rep !== '0') || kilos !== '0') {
+                dayHasData = true;
+                dayContent += `<p>${getExerciseName(day, index)}:<br> 
+                  Repeticiones: Set 1: ${reps[0]}, Set 2: ${reps[1]}, Set 3: ${reps[2]} <br> 
+                  Kilos: ${kilos}</p>`;
+              }
+            });
+  
+            if (dayHasData) {
+              weekHasData = true;
+              weekContent += dayContent;
             }
-          })
-  
-          if (dayHasData) {
-            weekHasData = true
-            weekContent += dayContent
           }
-        })
+        });
       }
   
       if (weekHasData) {
-        savedWeeks.push(week) // Guarda la semana con datos
-        printContent += weekContent
+        savedWeeks.push(week);
+        printContent += weekContent;
       }
     }
   
-    // Si hay semanas con datos, imprime el contenido
     if (savedWeeks.length > 0) {
-      printContent += '</body></html>'
-  
-      const printWindow = window.open('', '', 'width=800,height=600')
-      printWindow.document.write(printContent)
-      printWindow.document.close()
-      printWindow.print()
+      printContent += '</body></html>';
+      const printWindow = window.open('', '', 'width=800,height=600');
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
     } else {
-      alert('No hay datos guardados para imprimir.')
+      alert('No hay datos guardados para imprimir.');
     }
   }
 
@@ -239,7 +243,7 @@ export default function WorkoutTracker() {
     }
   }
 
-  return (
+return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold text-center mb-4">Registro de Ejercicios Mensuales</h1>
       <div className="flex justify-center items-center mb-4">
@@ -264,11 +268,17 @@ export default function WorkoutTracker() {
         <TableHeader>
           <TableRow>
             {Object.keys(exercises[currentWeek] || {}).map(day => (
-              <TableHead key={day}>
-                <div className="flex justify-between items-center">
-                  <span>{day}</span>
+              <TableHead key={day}>{day}</TableHead>
+            ))}
+        </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            {Object.keys(exercises[currentWeek] || {}).map(day => (
+              <TableCell key={day}>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="mr-2">Ejercicios: {exercises[currentWeek][day].length}</span>
                   <div className="flex items-center">
-                    <span className="mr-2">Ejercicios: {exercises[currentWeek][day].length}</span>
                     <Button size="icon" variant="outline" onClick={() => handleExerciseCountChange(day, exercises[currentWeek][day].length - 1)}>
                       <Minus className="h-4 w-4" />
                     </Button>
@@ -277,60 +287,58 @@ export default function WorkoutTracker() {
                     </Button>
                   </div>
                 </div>
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow>
-            {Object.keys(exercises[currentWeek] || {}).map(day => (
-              <TableCell key={day}>
-                {exercises[currentWeek][day].map((exercise, index) => (
-                  <div key={`${day}-${index}`} className="mb-6 p-2 bg-gray-100 rounded">
-                    <div className="flex items-center justify-between mb-2">
-                      {editingExercise.day === day && editingExercise.index === index ? (
-                        <>
-                          <Input
-                            value={newExerciseName}
-                            onChange={(e) => setNewExerciseName(e.target.value)}
-                            className="mr-2"
-                          />
-                          <div>
-                            <Button size="icon" variant="ghost" onClick={saveNewExerciseName} className="mr-1">
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button size="icon" variant="ghost" onClick={cancelEditing}>
-                              <X className="h-4 w-4" />
-                            </Button>
+                <Table>
+                  <TableBody>
+                    {exercises[currentWeek][day].map((exercise, index) => (
+                      <TableRow key={`${day}-${index}`}>
+                        <TableCell>
+                          <div className="flex items-center justify-between mb-2">
+                            {editingExercise.day === day && editingExercise.index === index? (
+                              <>
+                                <Input
+                                  value={newExerciseName}
+                                  onChange={(e) => setNewExerciseName(e.target.value)}
+                                  className="mr-2"
+                                />
+                                <div>
+                                  <Button size="icon" variant="ghost" onClick={saveNewExerciseName} className="mr-1">
+                                    <Check className="h-4 w-4" />
+                                  </Button>
+                                  <Button size="icon" variant="ghost" onClick={cancelEditing}>
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <span className="font-medium">{getExerciseName(day, index)}</span>
+                                <Button size="icon" variant="ghost" onClick={() => startEditing(day, index)}>
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
                           </div>
-                        </>
-                      ) : (
-                        <>
-                          <span className="font-medium">{getExerciseName(day, index)}</span>
-                          <Button size="icon" variant="ghost" onClick={() => startEditing(day, index)}>
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      {[1, 2, 3].map(set => (
-                        <div key={`${day}-${index}-set${set}`} className="flex items-center justify-between">
-                          <span className="w-16">Set {set}:</span>
-                          <RepCounter id={`reps-${currentWeek}-${day}-${index}-set${set}`} />
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-2 flex items-center justify-between">
-                      <label htmlFor={`number-${currentWeek}-${day}-${index}`} className="mr-2">Kilos:</label>
-                      <Input
-                        type="number"
-                        id={`number-${currentWeek}-${day}-${index}`}
-                        className="w-20"
-                      />
-                    </div>
-                  </div>
-                ))}
+                          <div className="space-y-2">
+                            {[1, 2, 3].map(set => (
+                              <div key={`${day}-${index}-set${set}`} className="flex items-center justify-between">
+                                <span className="w-16">Set {set}:</span>
+                                <RepCounter id={`reps-${currentWeek}-${day}-${index}-set${set}`} />
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-2 flex items-center justify-between">
+                            <span className="mr-2" htmlFor={`number-${currentWeek}-${day}-${index}`}>Kilos:</span>
+                            <Input
+                              type="number"
+                              id={`number-${currentWeek}-${day}-${index}`}
+                              className="w-20"
+                            />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </TableCell>
             ))}
           </TableRow>
