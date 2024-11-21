@@ -114,16 +114,18 @@ export default function WorkoutTracker() {
       [currentWeek]: remainingDays
     }))
   }
+  
+function getWeekDates(week) {
+  const currentYear = new Date().getFullYear();
+  const startDate = new Date(currentYear, 0, 1);
+  startDate.setDate(startDate.getDate() + (week - 1) * 7 - startDate.getDay());
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + 6);
 
-  function getWeekDates(week) {
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - (startDate.getDay() + 1) + (week - 1) * 7)
-    const endDate = new Date(startDate)
-    endDate.setDate(startDate.getDate() + 6)
+  const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+  return `Del ${startDate.toLocaleDateString('es-ES', options)} al ${endDate.toLocaleDateString('es-ES', options)}`;
+}
 
-    const options = { day: '2-digit', month: '2-digit', year: 'numeric' }
-    return `Del ${startDate.toLocaleDateString('es-ES', options)} al ${endDate.toLocaleDateString('es-ES', options)}`
-  }
 
   function saveInputs() {
     document.querySelectorAll('input[type="number"]').forEach(numberInput => {
