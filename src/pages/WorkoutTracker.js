@@ -259,7 +259,7 @@ function getWeekDates(week) {
   }
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold text-center mb-4">Registro de Ejercicios Mensuales</h1>
+      <h1 className="text-2xl font-bold text-center mb-4">Registro de Ejercicios Semanales</h1>
       <div className="flex justify-center items-center mb-4">
         <Button onClick={() => setCurrentWeek(prev => prev > 1 ? prev - 1 : prev)}>Semana Anterior</Button>
         <span className="mx-4 font-bold">Semana {currentWeek}</span>
