@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Button from '../components/ui/button'
 import Input from '../components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table'
-import { Edit2, Check, X, Plus, Minus, Sun, Moon } from 'lucide-react'
+import { Edit2, Check, X, Plus, Minus} from 'lucide-react'
 
 const defaultExercises = ["Press de Banca", "Fondos en Paralelas", "Elevaciones Laterales", "Extensiones de Tríceps"]
 
@@ -53,12 +53,13 @@ const RepCounter = ({ id, initialValue = 0 }) => {
 }
 
 export default function WorkoutTracker() {
+  
   const [currentWeek, setCurrentWeek] = useState(getCurrentWeek())
   const [exercises, setExercises] = useState(initialExercises)
   const [editingExercise, setEditingExercise] = useState({ day: '', index: -1 })
   const [newExerciseName, setNewExerciseName] = useState('')
   const [isDarkMode, setIsDarkMode] = useState(false);
-
+  
   useEffect(() => {
     // Inicializar la semana actual si no existe en el estado
     if (!exercises[currentWeek]) {
@@ -114,19 +115,18 @@ export default function WorkoutTracker() {
       [currentWeek]: remainingDays
     }))
   }
+
+  function getWeekDates(week) {
+    const currentYear = new Date().getFullYear();
+    const startDate = new Date(currentYear, 0, 1);
+    startDate.setDate(startDate.getDate() + (week - 1) * 7 - startDate.getDay());
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
   
-function getWeekDates(week) {
-  const currentYear = new Date().getFullYear();
-  const startDate = new Date(currentYear, 0, 1);
-  startDate.setDate(startDate.getDate() + (week - 1) * 7 - startDate.getDay());
-  const endDate = new Date(startDate);
-  endDate.setDate(startDate.getDate() + 6);
-
-  const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
-  return `Del ${startDate.toLocaleDateString('es-ES', options)} al ${endDate.toLocaleDateString('es-ES', options)}`;
-}
-
-
+    const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+    return `Del ${startDate.toLocaleDateString('es-ES', options)} al ${endDate.toLocaleDateString('es-ES', options)}`;
+  }
+  
   function saveInputs() {
     document.querySelectorAll('input[type="number"]').forEach(numberInput => {
       localStorage.setItem(numberInput.id, numberInput.value)
@@ -260,19 +260,23 @@ function getWeekDates(week) {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold text-center mb-4">Registro de Ejercicios Semanales</h1>
-      <div className="flex justify-center items-center mb-4">
+      <div className="flex flex-wrap justify-center items-center mb-4 gap-2">
         <Button onClick={() => setCurrentWeek(prev => prev > 1 ? prev - 1 : prev)}>Semana Anterior</Button>
-        <span className="mx-4 font-bold">Semana {currentWeek}</span>
+        <span className="mx-2 font-bold">Semana {currentWeek}</span>
         <Button onClick={() => setCurrentWeek(prev => prev + 1)}>Semana Siguiente</Button>
-        <Button onClick={toggleDarkMode} variant="outline" className="ml-4">
-          {isDarkMode ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
-          {isDarkMode ? 'Modo Claro' : 'Modo Oscuro'}
-        </Button>
+        <div className="flex items-center">
+          <span className="mr-2">Modo Oscuro</span>
+          <label className="switch">
+            <input 
+              type="checkbox" 
+              checked={isDarkMode} 
+              onChange={toggleDarkMode} 
+            />
+            <span className="slider round"></span>
+          </label>
+        </div>
       </div>
-      <div className="text-center mb-4 text-sm text-gray-600">{getWeekDates(currentWeek)}</div>
-      <div className="flex justify-center mb-4 space-x-2">
-        <Button onClick={handleSave}>Guardar Progreso</Button>
-        <Button onClick={handlePrint}>Imprimir Datos</Button>
+      <div className="flex justify-center items-center mb-4 gap-2">
         <Button onClick={removeDay} variant="outline">
           <Minus className="h-4 w-4 mr-2" />
           Quitar Día
@@ -282,88 +286,96 @@ function getWeekDates(week) {
           Añadir Día
         </Button>
       </div>
-      <Table className="table">
-        <TableHeader className="table-header">
-          <TableRow>
-            {Object.keys(exercises[currentWeek] || {}).map(day => (
-              <TableHead key={day} className="table-header-th">
-                {day}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody className="table-body">
-          <TableRow>
-            {Object.keys(exercises[currentWeek] || {}).map(day => (
-              <TableCell key={day} className="table-body-td">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="mr-2">Ejercicios: {exercises[currentWeek][day].length}</span>
-                  <div className="flex items-center">
-                    <Button size="icon" variant="outline" onClick={() => handleExerciseCountChange(day, exercises[currentWeek][day].length - 1)}>
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <Button size="icon" variant="outline" onClick={() => handleExerciseCountChange(day, exercises[currentWeek][day].length + 1)}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
+      <div className="overflow-x-auto">
+        <Table className="table w-full">
+          <TableHeader className="table-header">
+            <TableRow>
+              {Object.keys(exercises[currentWeek] || {}).map(day => (
+                <TableHead key={day} className="table-header-th">
+                  {day}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody className="table-body">
+            <TableRow>
+              {Object.keys(exercises[currentWeek] || {}).map(day => (
+                <TableCell key={day} className="table-body-td">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="mr-2">Ejercicios: {exercises[currentWeek][day].length}</span>
+                    <div className="flex items-center">
+                      <Button size="icon" variant="outline" onClick={() => handleExerciseCountChange(day, exercises[currentWeek][day].length - 1)}>
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" variant="outline" onClick={() => handleExerciseCountChange(day, exercises[currentWeek][day].length + 1)}>
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-                <Table className="table">
-                  <TableBody className="table-body">
-                    {exercises[currentWeek][day].map((exercise, index) => (
-                      <TableRow key={`${day}-${index}`} className="table-body-tr">
-                        <TableCell className="table-body-td">
-                          <div className="flex items-center justify-between mb-2">
-                            {editingExercise.day === day && editingExercise.index === index ? (
-                              <>
-                                <Input
-                                  value={newExerciseName}
-                                  onChange={(e) => setNewExerciseName(e.target.value)}
-                                  className="mr-2"
-                                />
-                                <div>
-                                  <Button size="icon" variant="ghost" onClick={saveNewExerciseName} className="mr-1">
-                                    <Check className="h-4 w-4" />
-                                  </Button>
-                                  <Button size="icon" variant="ghost" onClick={cancelEditing}>
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <span className="font-medium">{getExerciseName(day, index)}</span>
-                                <Button size="icon" variant="ghost" onClick={() => startEditing(day, index)}>
-                                  <Edit2 className="h-4 w-4" />
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                          <div className="space-y-2">
-                            {[1, 2, 3].map(set => (
-                              <div key={`${day}-${index}-set${set}`} className="flex items-center justify-between">
-                                <span className="w-16">Set {set}:</span>
-                                <RepCounter id={`reps-${currentWeek}-${day}-${index}-set${set}`} />
+                  <div className="overflow-x-auto">
+                    <Table className="table w-full">
+                      <TableBody className="table-body">
+                        {exercises[currentWeek][day].map((exercise, index) => (
+                          <TableRow key={`${day}-${index}`} className="table-body-tr">
+                            <TableCell className="table-body-td">
+                              <div className="flex flex-wrap items-center justify-between mb-2 gap-2">
+                                {editingExercise.day === day && editingExercise.index === index ? (
+                                  <>
+                                    <Input
+                                      value={newExerciseName}
+                                      onChange={(e) => setNewExerciseName(e.target.value)}
+                                      className="mr-2 flex-grow"
+                                    />
+                                    <div>
+                                      <Button size="icon" variant="ghost" onClick={saveNewExerciseName} className="mr-1">
+                                        <Check className="h-4 w-4" />
+                                      </Button>
+                                      <Button size="icon" variant="ghost" onClick={cancelEditing}>
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="font-medium">{getExerciseName(day, index)}</span>
+                                    <Button size="icon" variant="ghost" onClick={() => startEditing(day, index)}>
+                                      <Edit2 className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                )}
                               </div>
-                            ))}
-                          </div>
-                          <div className="mt-2 flex items-center justify-between">
-                            <span className="mr-2" htmlFor={`number-${currentWeek}-${day}-${index}`}>Kilos:</span>
-                            <Input
-                              type="number"
-                              id={`number-${currentWeek}-${day}-${index}`}
-                              className="w-20"
-                            />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableBody>
-      </Table>
+                              <div className="space-y-2">
+                                {[1, 2, 3].map(set => (
+                                  <div key={`${day}-${index}-set${set}`} className="flex items-center justify-between">
+                                    <span className="w-16">Set {set}:</span>
+                                    <RepCounter id={`reps-${currentWeek}-${day}-${index}-set${set}`} />
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="mt-2 flex items-center justify-between">
+                                <span className="mr-2" htmlFor={`number-${currentWeek}-${day}-${index}`}>Kilos:</span>
+                                <Input
+                                  type="number"
+                                  id={`number-${currentWeek}-${day}-${index}`}
+                                  className="w-20"
+                                />
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex justify-center items-center mt-4 gap-2">
+        <Button onClick={handleSave}>Guardar Progreso</Button>
+        <Button onClick={handlePrint}>Imprimir Datos</Button>
+      </div>
     </div>
   )
 }
