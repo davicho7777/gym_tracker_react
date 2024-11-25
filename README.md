@@ -1,70 +1,52 @@
-# Getting Started with Create React App
+# Weekly Workout Tracker
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is a **React** application designed to track weekly workouts. It provides an easy way to log and manage exercises performed each week, including tracking repetitions, weights used, and more.
 
-## Available Scripts
+## Key Features
 
-In the project directory, you can run:
+- **Weekly tracking**: Log exercises for each day of the week and keep a historical record.
+- **Dark mode**: Adaptable interface with light and dark mode options.
+- **Real-time editing**: Add, edit, or delete exercises directly within the app.
+- **Set and weight management**: Track repetitions and weights used for each exercise across three sets.
+- **Local persistence**: Data is automatically saved in the browser's local storage.
+- **Print options**: Export and print logged progress.
 
-### `npm start`
+## Technologies Used
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **React**: To build an interactive and dynamic interface.
+- **Lucide Icons**: Modern and customizable icons.
+- **LocalStorage**: For saving data locally.
+- **Modular CSS**: Responsive design with custom styles.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Getting Started
 
-### `npm test`
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/your-username/your-repo.git
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
+# Registro de Ejercicios Semanales
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Este proyecto es una aplicación desarrollada en **React** para llevar un seguimiento de los ejercicios semanales. Permite registrar y gestionar de manera sencilla los ejercicios realizados durante cada semana, incluyendo el progreso de repeticiones, kilos utilizados y más.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Características principales
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **Seguimiento semanal**: Registra los ejercicios para cada día de la semana y conserva el historial semanal.
+- **Modo oscuro**: Interfaz adaptable con opción de modo claro y oscuro.
+- **Edición en tiempo real**: Agrega, edita o elimina ejercicios directamente desde la aplicación.
+- **Gestión de sets y pesos**: Controla las repeticiones y el peso usado para cada ejercicio en tres sets.
+- **Persistencia local**: Los datos se guardan automáticamente en el almacenamiento local del navegador.
+- **Opciones de impresión**: Exporta y imprime el progreso registrado.
 
-### `npm run eject`
+## Tecnologías utilizadas
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **React**: Para construir la interfaz interactiva y dinámica.
+- **Lucide Icons**: Iconos modernos y personalizables.
+- **LocalStorage**: Para persistir los datos localmente.
+- **CSS modular**: Diseño responsivo con estilos personalizados.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Cómo empezar
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1. Clona este repositorio:
+   ```bash
+   git clone https://github.com/tu-usuario/tu-repo.git
